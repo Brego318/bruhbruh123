@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kobestyaosani</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@100..900&display=swap" rel="stylesheet">
+
+    <style>
+        h1 {
+            color: white;
+            font-size: 40px;
+            font-family: "Noto Serif Georgian", serif;
+            text-decoration: none;
+            list-style: none;
+        }
+
+        button {
+            background-color: orange;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: "Montserrat", sans-serif;
+            font-weight: bold;    
+        }
+
+        button:hover {
+            background-color: darkorange;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 24px;
+            }
+            button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="xbrv-orbit-nav">
+        <div class="xbrv-logo-slot">
+            <a href="index.html"><h1>კობესტყაოსანი</h1></a>
+        </div>
+
+        <button class="mobile-menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <nav class="xbrv-hyper-links">
+            <a href="index.html">მთავარი გვერდი</a>
+            <a href="comics.html">კომიქსი</a>
+            <a href="poema.html">პოემა</a>
+        </nav>
+
+        <div class="xbrv-auth-zone desktop-auth">
+            <a href="signin.html"><button class="xbrv-auth-btn">SIGN IN</button></a>
+        </div>
+    </header>
+
+  <main>
+      <!-- MAIN CONTACT ZONE -->
+    <section class="neon-city-shell">
+        <section class="kb-hero">
+            <div class="kb-hero__img">
+                <img src="image.png" alt="რაჭა" />
+            </div>
+
+            <div class="kb-hero__content">
+                <h2 class="kb-hero__title">
+                რაჭის ლამაზსა ქალაქში<br />
+                კობე ერთია ათასში
+                </h2>
+
+                <a class="kb-hero__btn" href="">
+                წაიკითხე სრულად
+                </a>
+            </div>
+        </section>
+    </section>
+
+  </main>
+
+
+  <footer>
+    <div class="footer">
+        <p style="font-family: 'Noto Serif Georgian', serif;">&copy; 2026 კობესტყაოსანი. </p>
+    </div>
+  </footer>
+  
+  <script>
+    // Mobile menu toggle
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navLinks = document.querySelector('.xbrv-hyper-links');
+
+    if (menuToggle) {
+      menuToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+      });
+
+      // Close menu when a link is clicked
+      document.querySelectorAll('.xbrv-hyper-links a').forEach(link => {
+        link.addEventListener('click', () => {
+          navLinks.classList.remove('active');
+        });
+      });
+    }
+  </script>
+</body>
+</html>
