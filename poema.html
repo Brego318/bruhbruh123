@@ -51,9 +51,16 @@
     </style>
 </head>
 <body>
+    <script>
+  if (!localStorage.getItem("nickname")) {
+    window.location.href = "./signin.html";
+  }
+</script>
+
+
     <header class="xbrv-orbit-nav">
         <div class="xbrv-logo-slot">
-            <a href="index.html"><h1>კობესტყაოსანი</h1></a>
+            <a href="index.html"><h1 >კობესტყაოსანი</h1></a>
         </div>
 
         <button class="mobile-menu-toggle" aria-label="Toggle menu">
@@ -71,6 +78,23 @@
         </div>
     </header>
 
+    <section style="max-width:800px;margin:60px auto;padding:20px;">
+  <h2 style="color:white;font-family:'Montserrat',sans-serif;">Comments</h2>
+
+  <textarea
+    id="commentText"
+    placeholder="Write a comment..."
+    maxlength="300"
+    style="width:100%;height:120px;margin-top:10px;"
+  ></textarea>
+
+  <button id="postComment" style="margin-top:10px;">Post</button>
+  <p id="commentStatus" style="color:white;"></p>
+
+  <div id="commentList" style="margin-top:30px;"></div>
+</section>
+
+
   <main>
       <!-- MAIN CONTACT ZONE -->
     <section class="neon-city-shell">
@@ -83,7 +107,7 @@
 მწერების მწვავე ჭრიჭინში<br>
 ბიჭი ფიქრებთან ჭიდილში<br>
 უნდა დაწერა რამის<br>
-3ის 10 წუთზე ღამის<br>
+სამის 10 წუთზე ღამის<br>
 ფიქრობს სიტყვებზე მამის.<br>
 გვერძე კი ფისო კნავის<br>
 მამა ეუბნება მასო<br>
@@ -165,7 +189,21 @@
 ანის ის შეყავს კარში<br>
 აძინებს თავის სახლში<br>
 კესო იქ თბილად იძინებს<br>
-და დილით მშვიდად იღვიძებს<br></p>
+და დილით მშვიდად იღვიძებს<br>
+გათენდა დილა ნათელი<br>
+ანიმ მიართვა საჭმელი<br>
+თან უთხრა კესო ძვირფასო<br>
+წამო დაქალებს გაგაცნობ<br>
+სახლისწინ შეხვდა ხატია<br>
+უთხრა ტასო ჯერ გზაშია<br>
+წწამო მივწეროტ კობეს<br>
+ყველაფერს თუ არ სჯობდეს<br>
+კობემ რომ ნახა კესო<br>
+ეს აქ რრას აკეთებსო<br>
+გოგოებს კი გაუკვირდათ<br>
+საიდან იცნობს ესო<br>
+კობე მოუყვა რაც მოხდა<br>
+ და მას საიდან სცნობდა<br></p>
 
 
  
@@ -280,5 +318,97 @@
       });
     }
   </script>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    serverTimestamp,
+    query,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBd7OSQKhHA-iY4ET5JQOF-PDwb-fIQ46Y",
+    authDomain: "kobestyaosani.firebaseapp.com",
+    projectId: "kobestyaosani",
+    storageBucket: "kobestyaosani.firebasestorage.app",
+    messagingSenderId: "30467496929",
+    appId: "1:30467496929:web:2d49f73e90388c2fcd10a0"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const commentInput = document.getElementById("commentText");
+  const postBtn = document.getElementById("postComment");
+  const statusEl = document.getElementById("commentStatus");
+  const listEl = document.getElementById("commentList");
+
+  function nickname() {
+    return (localStorage.getItem("nickname") || "").trim();
+  }
+
+  postBtn.addEventListener("click", async () => {
+    const name = nickname();
+    const text = commentInput.value.trim();
+
+    if (!name) {
+      window.location.href = "./signin.html";
+      return;
+    }
+
+    if (!text) {
+      statusEl.textContent = "Write something first.";
+      return;
+    }
+
+    postBtn.disabled = true;
+    statusEl.textContent = "Posting...";
+
+    try {
+      await addDoc(collection(db, "comments"), {
+        nickname: name,
+        text,
+        createdAt: serverTimestamp()
+      });
+
+      commentInput.value = "";
+      statusEl.textContent = "Posted ✅";
+    } catch (e) {
+      console.error(e);
+      statusEl.textContent = "Error posting comment.";
+    } finally {
+      postBtn.disabled = false;
+    }
+  });
+
+  const q = query(collection(db, "comments"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snap) => {
+    listEl.innerHTML = "";
+    snap.forEach((doc) => {
+      const c = doc.data();
+      const div = document.createElement("div");
+      div.style.borderBottom = "1px solid #333";
+      div.style.padding = "10px 0";
+      div.innerHTML = `<strong>${escapeHtml(c.nickname)}</strong><p>${escapeHtml(c.text)}</p>`;
+      listEl.appendChild(div);
+    });
+  });
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, (m) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    }[m]));
+  }
+</script>
+
 </body>
 </html>

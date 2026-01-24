@@ -102,22 +102,10 @@
   </footer>
   
   <script>
-    // Mobile menu toggle
-    const menuToggle = document.querySelector('.mobile-menu-toggle');
-    const navLinks = document.querySelector('.xbrv-hyper-links');
+  if (!localStorage.getItem("nickname")) {
+    window.location.href = "./signin.html";
+  }
+    </script>
 
-    if (menuToggle) {
-      menuToggle.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-      });
-
-      // Close menu when a link is clicked
-      document.querySelectorAll('.xbrv-hyper-links a').forEach(link => {
-        link.addEventListener('click', () => {
-          navLinks.classList.remove('active');
-        });
-      });
-    }
-  </script>
 </body>
 </html>

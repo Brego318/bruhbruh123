@@ -89,6 +89,12 @@ table {
   width: 178px;
 }
 
+.xbrv-logo-slot a,
+.xbrv-logo-slot a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
 .xbrv-hyper-links{
     display: flex;
     gap: 25px;
