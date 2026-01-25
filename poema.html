@@ -78,21 +78,7 @@
         </div>
     </header>
 
-    <section style="max-width:800px;margin:60px auto;padding:20px;">
-  <h2 style="color:white;font-family:'Montserrat',sans-serif;">Comments</h2>
 
-  <textarea
-    id="commentText"
-    placeholder="Write a comment..."
-    maxlength="300"
-    style="width:100%;height:120px;margin-top:10px;"
-  ></textarea>
-
-  <button id="postComment" style="margin-top:10px;">Post</button>
-  <p id="commentStatus" style="color:white;"></p>
-
-  <div id="commentList" style="margin-top:30px;"></div>
-</section>
 
 
   <main>
@@ -286,10 +272,55 @@
 ძლივს დაგეწიეთ რა სწრაფები ხართო<br>
 და აქ შეიკრა GOAT სასტავი<br>
 კობეს დამხმარე ძალა აქ არის<br></p>
+
+<h1 class="she">თავი 6 </h1>
+
+<p class="p">დაიწყო თავგადასავალი<br>
+აქვთ მათ მრავალი სავალი<br>
+გავიდა დღე და ღამე<br>
+ამოდის თეთრი მთვარე<br>
+ბრეგო წამოწვა   ძირსაო<br>
+მომშივდა დებილ ვირსაო<br>
+რამე საჭმელი მომეცით<br>
+ სანამ პირში ყლე მოგეცით<br>
+წინ გაურბინა ბიჭებს ირემმა<br>
+ამოანათა მათში იმედმა<br>
+გაეკიდა მას ალექსა<br>
+თანაც დანები გალესა<br>
+დაიჭირა მან ის<br>
+დაუწყო ჩარტყმა ქვის<br>
+რაღაც მოძრაობს ბუჩქებში<br>
+ალექსა იხრება მუხლებში<br>
+რაღაცა ხვდება მუცელში<br>
+ეს რა მომხვდაო სპილო?<br>
+ბუჩქებიდან გამოდის<br> 
+პატარა ბიჭი წილო<br>
+მე აქ დევმა გამომიშვა<br>
+ალექსასკენ გამოიქცა<br>
+ალექსა ყვირის შიშით<br>
+და წილოს ისვრის იქით<br>
+ათო ადებს ფეხს მჭიდროს<br>
+ასე სრულდება ამბავი წილოს<br></p>
         </div>
         </div>
 
     </section>
+
+        <section style="max-width:800px;margin:60px auto;padding:20px; background-color: rgb(187, 59, 0);">
+  <h2 style="color:rgb(255, 255, 255);font-family:'Montserrat',sans-serif;">Comments</h2>
+
+  <textarea
+    id="commentText"
+    placeholder="Write a comment..."
+    maxlength="300"
+    style="width:100%;height:120px;margin-top:10px;"
+  ></textarea>
+
+  <button id="postComment" style="margin-top:10px;">Post</button>
+  <p id="commentStatus" style="color:rgb(255, 255, 255);"></p>
+
+  <div id="commentList" style="margin-top:30px;"></div>
+</section>
 
   </main>
 
@@ -319,7 +350,7 @@
     }
   </script>
 
-  <script type="module">
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
   import {
     getFirestore,
@@ -328,7 +359,9 @@
     serverTimestamp,
     query,
     orderBy,
-    onSnapshot
+    onSnapshot,
+    deleteDoc,
+    doc
   } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -342,6 +375,8 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+
+  const ADMIN_NICKNAME = "Adm123"; // 👈 must match EXACTLY what you saved in signin
 
   const commentInput = document.getElementById("commentText");
   const postBtn = document.getElementById("postComment");
@@ -360,7 +395,6 @@
       window.location.href = "./signin.html";
       return;
     }
-
     if (!text) {
       statusEl.textContent = "Write something first.";
       return;
@@ -387,14 +421,43 @@
   });
 
   const q = query(collection(db, "comments"), orderBy("createdAt", "desc"));
+
+  // ✅ REPLACED onSnapshot with admin delete support
   onSnapshot(q, (snap) => {
     listEl.innerHTML = "";
-    snap.forEach((doc) => {
-      const c = doc.data();
+
+    snap.forEach((docSnap) => {
+      const c = docSnap.data();
+
       const div = document.createElement("div");
       div.style.borderBottom = "1px solid #333";
       div.style.padding = "10px 0";
-      div.innerHTML = `<strong>${escapeHtml(c.nickname)}</strong><p>${escapeHtml(c.text)}</p>`;
+
+      div.innerHTML = `
+        <strong>${escapeHtml(c.nickname)}</strong>
+        <p>${escapeHtml(c.text)}</p>
+      `;
+
+      // show delete button only to admin
+      if (nickname() === ADMIN_NICKNAME) {
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.style.marginTop = "6px";
+        delBtn.style.background = "crimson";
+        delBtn.style.color = "white";
+        delBtn.style.border = "none";
+        delBtn.style.padding = "8px 12px";
+        delBtn.style.borderRadius = "8px";
+        delBtn.style.cursor = "pointer";
+
+        delBtn.onclick = async () => {
+          if (!confirm("Delete this comment?")) return;
+          await deleteDoc(doc(db, "comments", docSnap.id));
+        };
+
+        div.appendChild(delBtn);
+      }
+
       listEl.appendChild(div);
     });
   });
@@ -409,6 +472,7 @@
     }[m]));
   }
 </script>
+
 
 </body>
 </html>
