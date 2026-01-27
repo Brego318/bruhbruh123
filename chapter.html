@@ -1,21 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kobestyaosani</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-
-   <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@100..900&display=swap" rel="stylesheet">
-
-    <style>
-        h1 {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter</title>
+  <link rel="stylesheet" href="chapter.css">
+  <style>
+            h1 {
             color: white;
             font-size: 40px;
             font-family: "Noto Serif Georgian", serif;
@@ -48,10 +39,11 @@
                 font-size: 14px;
             }
         }
-    </style>
+  </style>
 </head>
 <body>
-    <div class="page-curtain" id="curtain"></div>
+
+     <div class="page-curtain" id="curtain"></div>
 
 
     <header class="xbrv-orbit-nav">
@@ -77,22 +69,27 @@
   <main>
       <!-- MAIN CONTACT ZONE -->
     <section class="neon-city-shell">
-        <section class="kb-hero">
-            <div class="kb-hero__img">
-                <img src="image.png" alt="რაჭა" />
-            </div>
+      <div style="max-width:900px;margin:60px auto;padding:20px;color:white;">
 
-            <div class="kb-hero__content">
-                <h2 class="kb-hero__title">
-                რაჭის ლამაზსა ქალაქში<br />
-                კობე ერთია ათასში
-                </h2>
+  <!-- Chapter Title -->
+  <h1 id="title" style="font-family:'Noto Serif Georgian', serif;"></h1>
 
-                <a class="kb-hero__btn" href="poema.html">
-                წაიკითხე სრულად
-                </a>
-            </div>
-        </section>
+  <!-- Chapter Text -->
+  <div id="content" style="margin-top:30px;line-height:1.8;font-size:18px;"></div>
+
+  <!-- Locked / Error Message -->
+  <div id="status" style="
+    margin-top:40px;
+    padding:20px;
+    border-radius:12px;
+    background:#111;
+    color:#aaa;
+    display:none;
+    text-align:center;
+  "></div>
+
+  </div>
+
     </section>
 
   </main>
@@ -103,15 +100,60 @@
         <p style="font-family: 'Noto Serif Georgian', serif;">&copy; 2026 კობესტყაოსანი. პოეტი : საბა მელქაძე, პოეტის დამხმარე : ალექსანდრე გუდამათიაშვილი, მხატვარი : მათე ათოშვილი, საიტის ამწყობი : ნიკა ბრეგაძე.</p>
     </div>
   </footer>
-  
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd7OSQKhHA-iY4ET5JQOF-PDwb-fIQ46Y",
+      authDomain: "kobestyaosani.firebaseapp.com",
+      projectId: "kobestyaosani",
+      storageBucket: "kobestyaosani.firebasestorage.app",
+      messagingSenderId: "30467496929",
+      appId: "1:30467496929:web:2d49f73e90388c2fcd10a0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const titleEl = document.getElementById("title");
+    const contentEl = document.getElementById("content");
+    const statusEl = document.getElementById("status");
+
+    const id = new URLSearchParams(location.search).get("id");
+
+    if (!id) {
+      statusEl.style.display = "block";
+      statusEl.textContent = "Missing chapter id. Open like: chapter.html?id=1";
+      throw new Error("Missing id");
+    }
+
+    try {
+      const snap = await getDoc(doc(db, "chapters", String(id)));
+
+      // if doc doesn't exist
+      if (!snap.exists()) {
+        statusEl.style.display = "block";
+        statusEl.textContent = `Chapter ${id} not found.`;
+        throw new Error("Not found");
+      }
+
+      const ch = snap.data();
+      titleEl.textContent = ch.title || `Chapter ${id}`;
+      contentEl.innerHTML = ch.content || "";
+
+    } catch (e) {
+      // This is what happens when isPublic=false and rules block read
+      titleEl.textContent = "";
+      contentEl.innerHTML = "";
+      statusEl.style.display = "block";
+      statusEl.textContent = "🔒 This chapter is locked. Come back later.";
+      console.error(e);
+    }
+  </script>
+
   <script>
-  if (!localStorage.getItem("nickname")) {
-    window.location.href = "./signin.html";
-  }
-    </script>
-
-
-<script>
   const curtain = document.getElementById("curtain");
   const DURATION = 420; // must match CSS transition time
 
@@ -144,8 +186,6 @@
     }, DURATION);
   });
 </script>
-
-
 
 </body>
 </html>

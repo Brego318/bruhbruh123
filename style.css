@@ -54,6 +54,31 @@ table {
 	border-spacing: 0;
 }
 
+/* Curtain overlay */
+.page-curtain{
+  position: fixed;
+  inset: 0;
+  background: #b14100;   /* change color */
+  z-index: 9999;
+  pointer-events: none;
+
+  /* Start CLOSED (covers page) */
+  transform: translateX(0);
+  transition: transform 420ms ease;
+}
+
+/* OPEN state: move it fully off screen */
+.page-curtain.is-open{
+  transform: translateX(100%);
+}
+
+/* Optional: respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce){
+  .page-curtain{ transition: none; }
+}
+
+
+
 
 /* Custom Styles */
 

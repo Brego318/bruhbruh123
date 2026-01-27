@@ -51,6 +51,7 @@
     </style>
 </head>
 <body>
+  <div class="page-curtain" id="curtain"></div>
     <header class="xbrv-orbit-nav">
         <div class="xbrv-logo-slot">
             <a href="index.html"><h1 >კობესტყაოსანი</h1></a>
@@ -96,7 +97,7 @@
 
   <footer>
     <div class="footer">
-        <p style="font-family: 'Noto Serif Georgian', serif;">&copy; 2026 კობესტყაოსანი. </p>
+        <p style="font-family: 'Noto Serif Georgian', serif;">&copy; 2026 კობესტყაოსანი. პოეტი : საბა მელქაძე, პოეტის დამხმარე : ალექსანდრე გუდამათიაშვილი, მხატვარი : მათე ათოშვილი, საიტის ამწყობი : ნიკა ბრეგაძე.</p>
     </div>
   </footer>
   
@@ -158,18 +159,18 @@
     clearBtn.addEventListener("click", () => {
       localStorage.removeItem("nickname");
       nicknameEl.value = "";
-      statusEl.textContent = "Cleared.";
+      statusEl.textContent = "წაიშალა.";
     });
 
     async function saveNickname() {
       const nickname = nicknameEl.value.trim();
 
       if (nickname.length < 1) {
-        statusEl.textContent = "Type a nickname first.";
+        statusEl.textContent = "შეიყვანეთ თქვენი მეტსახელი.";
         return;
       }
       if (nickname.length > 20) {
-        statusEl.textContent = "Nickname too long (max 20).";
+        statusEl.textContent = "მეტსახელი ზედმეტად გრძელია (მაქს 20).";
         return;
       }
 
@@ -204,5 +205,40 @@
       if (e.key === "Enter") saveNickname();
     });
   </script>
+
+  <script>
+  const curtain = document.getElementById("curtain");
+  const DURATION = 420; // must match CSS transition time
+
+  // OPEN when page appears (including back/forward cache)
+  window.addEventListener("pageshow", () => {
+    // small delay so browser paints the closed curtain first
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => curtain.classList.add("is-open"));
+    });
+  });
+
+  // CLOSE on internal link click, then navigate
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("a");
+    if (!a) return;
+
+    const url = new URL(a.href, location.href);
+
+    const isSameOrigin = url.origin === location.origin;
+    const isModifiedClick = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
+    const isAnchorOnly = url.pathname === location.pathname && url.hash;
+
+    if (!isSameOrigin || isModifiedClick || a.target === "_blank" || a.hasAttribute("download") || isAnchorOnly) return;
+
+    e.preventDefault();
+
+    curtain.classList.remove("is-open"); // go CLOSED (covers)
+    setTimeout(() => {
+      location.href = a.href;
+    }, DURATION);
+  });
+</script>
+
 </body>
 </html>
