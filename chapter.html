@@ -4,103 +4,71 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chapter</title>
-  <link rel="stylesheet" href="chapter.css">
-  <style>
-            h1 {
-            color: white;
-            font-size: 40px;
-            font-family: "Noto Serif Georgian", serif;
-            text-decoration: none;
-            list-style: none;
-        }
 
-        button {
-            background-color: orange;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-family: "Montserrat", sans-serif;
-            font-weight: bold;    
-        }
+  <link rel="stylesheet" href="chapter.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        button:hover {
-            background-color: darkorange;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 24px;
-            }
-            button {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
-        }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@400;600;700;900&display=swap" rel="stylesheet">
 </head>
+
 <body>
+  <div class="bg"></div>
 
-     <div class="page-curtain" id="curtain"></div>
+  <!-- Header -->
+  <header class="xbrv-orbit-nav">
+    <div class="xbrv-logo-slot">
+      <a href="index.html"><h1>კობესტყაოსანი</h1></a>
+    </div>
 
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <i class="fas fa-bars"></i>
+    </button>
 
-    <header class="xbrv-orbit-nav">
-        <div class="xbrv-logo-slot">
-            <a href="index.html"><h1>კობესტყაოსანი</h1></a>
+    <nav class="xbrv-hyper-links">
+      <a href="index.html">მთავარი გვერდი</a>
+      <a href="comics.html">კომიქსი</a>
+      <a href="poema.html" class="active">პოემა</a>
+    </nav>
+
+    <div class="xbrv-auth-zone desktop-auth">
+      <a href="signin.html"><button class="xbrv-auth-btn">SIGN IN</button></a>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- Reading panel -->
+    <section class="reader panel">
+      <div class="reader-top">
+        <a class="back-link" href="poema.html">
+          <i class="fa-solid fa-arrow-left"></i>
+          უკან თავებზე
+        </a>
+
+        <div class="reader-tools">
+          <button class="tool" id="smallerBtn" type="button" title="Smaller text">A−</button>
+          <button class="tool" id="biggerBtn" type="button" title="Bigger text">A+</button>
         </div>
+      </div>
 
-        <button class="mobile-menu-toggle" aria-label="Toggle menu">
-            <i class="fas fa-bars"></i>
-        </button>
+      <h1 id="title" class="chapter-title"></h1>
 
-        <nav class="xbrv-hyper-links">
-            <a href="index.html">მთავარი გვერდი</a>
-            <a href="comics.html">კომიქსი</a>
-            <a href="poema.html">პოემა</a>
-        </nav>
+      <!-- If locked / missing id / not found, show this -->
+      <div id="status" class="status-card" style="display:none;"></div>
 
-        <div class="xbrv-auth-zone desktop-auth">
-            <a href="signin.html"><button class="xbrv-auth-btn">SIGN IN</button></a>
-        </div>
-    </header>
-
-  <main>
-      <!-- MAIN CONTACT ZONE -->
-    <section class="neon-city-shell">
-      <div style="max-width:900px;margin:60px auto;padding:20px;color:white;">
-
-  <!-- Chapter Title -->
-  <h1 id="title" style="font-family:'Noto Serif Georgian', serif;"></h1>
-
-  <!-- Chapter Text -->
-  <div id="content" style="margin-top:30px;line-height:1.8;font-size:18px;"></div>
-
-  <!-- Locked / Error Message -->
-  <div id="status" style="
-    margin-top:40px;
-    padding:20px;
-    border-radius:12px;
-    background:#111;
-    color:#aaa;
-    display:none;
-    text-align:center;
-  "></div>
-
-  </div>
-
+      <!-- Chapter content goes here -->
+      <article id="content" class="chapter-content"></article>
     </section>
 
+    <footer class="mini-footer">
+      <p>თუ გვერდი არ იტვირთება — სცადე refresh.</p>
+    </footer>
   </main>
 
 
-  <footer>
-    <div class="footer">
-        <p style="font-family: 'Noto Serif Georgian', serif;">&copy; 2026 კობესტყაოსანი. პოეტი : საბა მელქაძე, პოეტის დამხმარე : ალექსანდრე გუდამათიაშვილი, მხატვარი : მათე ათოშვილი, საიტის ამწყობი : ნიკა ბრეგაძე.</p>
-    </div>
-  </footer>
-
+  <!-- Firebase load chapter -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
@@ -123,69 +91,82 @@
 
     const id = new URLSearchParams(location.search).get("id");
 
-    if (!id) {
+    function showStatus(text){
       statusEl.style.display = "block";
-      statusEl.textContent = "Missing chapter id. Open like: chapter.html?id=1";
+      statusEl.textContent = text;
+    }
+
+    if (!id) {
+      titleEl.textContent = "";
+      contentEl.innerHTML = "";
+      showStatus("Missing chapter id. Open like: chapter.html?id=1");
       throw new Error("Missing id");
     }
 
     try {
       const snap = await getDoc(doc(db, "chapters", String(id)));
 
-      // if doc doesn't exist
       if (!snap.exists()) {
-        statusEl.style.display = "block";
-        statusEl.textContent = `Chapter ${id} not found.`;
+        titleEl.textContent = "";
+        contentEl.innerHTML = "";
+        showStatus(`Chapter ${id} not found.`);
         throw new Error("Not found");
       }
 
       const ch = snap.data();
+
       titleEl.textContent = ch.title || `Chapter ${id}`;
-      contentEl.innerHTML = ch.content || "";
+
+      // supports content OR text OR body
+      const raw =
+        (typeof ch.content === "string" && ch.content) ||
+        (typeof ch.text === "string" && ch.text) ||
+        (typeof ch.body === "string" && ch.body) ||
+        "";
+
+      if (!raw) {
+        contentEl.innerHTML = "";
+        showStatus("⚠️ No content found in Firestore (expected field: content).");
+      } else {
+        statusEl.style.display = "none";
+        // If your content is plain text (no <p> tags), preserve new lines:
+        const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
+        contentEl.innerHTML = looksLikeHtml ? raw : raw.replace(/\n/g, "<br>");
+      }
 
     } catch (e) {
-      // This is what happens when isPublic=false and rules block read
       titleEl.textContent = "";
       contentEl.innerHTML = "";
-      statusEl.style.display = "block";
-      statusEl.textContent = "🔒 This chapter is locked. Come back later.";
+      showStatus("🔒 ეს თავი ჩაკეტილია. დაბრუნდი მოგვიანებით.");
       console.error(e);
     }
   </script>
 
+  <!-- Text size controls -->
   <script>
-  const curtain = document.getElementById("curtain");
-  const DURATION = 420; // must match CSS transition time
+    const content = document.getElementById("content");
+    const key = "chapterFontSize";
+    const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-  // OPEN when page appears (including back/forward cache)
-  window.addEventListener("pageshow", () => {
-    // small delay so browser paints the closed curtain first
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => curtain.classList.add("is-open"));
+    function setSize(px){
+      content.style.fontSize = px + "px";
+      localStorage.setItem(key, String(px));
+    }
+
+    const saved = Number(localStorage.getItem(key));
+    if (saved) setSize(clamp(saved, 16, 24));
+
+    document.getElementById("smallerBtn").addEventListener("click", () => {
+      const cur = parseFloat(getComputedStyle(content).fontSize);
+      setSize(clamp(cur - 1, 16, 24));
     });
-  });
 
-  // CLOSE on internal link click, then navigate
-  document.addEventListener("click", (e) => {
-    const a = e.target.closest("a");
-    if (!a) return;
+    document.getElementById("biggerBtn").addEventListener("click", () => {
+      const cur = parseFloat(getComputedStyle(content).fontSize);
+      setSize(clamp(cur + 1, 16, 24));
+    });
+  </script>
 
-    const url = new URL(a.href, location.href);
-
-    const isSameOrigin = url.origin === location.origin;
-    const isModifiedClick = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
-    const isAnchorOnly = url.pathname === location.pathname && url.hash;
-
-    if (!isSameOrigin || isModifiedClick || a.target === "_blank" || a.hasAttribute("download") || isAnchorOnly) return;
-
-    e.preventDefault();
-
-    curtain.classList.remove("is-open"); // go CLOSED (covers)
-    setTimeout(() => {
-      location.href = a.href;
-    }, DURATION);
-  });
-</script>
-
+  
 </body>
 </html>

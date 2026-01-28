@@ -13,138 +13,58 @@
    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@100..900&display=swap" rel="stylesheet">
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@400;700;900&display=swap" rel="stylesheet">
 
-    <style>
-        h1 {
-            color: white;
-            font-size: 40px;
-            font-family: "Noto Serif Georgian", serif;
-            text-decoration: none;
-            list-style: none;
-        }
-
-        button {
-            background-color: orange;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-family: "Montserrat", sans-serif;
-            font-weight: bold;    
-        }
-
-        button:hover {
-            background-color: darkorange;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 24px;
-            }
-            button {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
-        }
-    </style>
-</head>
 <body>
-    <div class="page-curtain" id="curtain"></div>
 
+  <!-- Background overlay for header + main -->
+  <div class="bg-hero"></div>
 
-    <header class="xbrv-orbit-nav">
-        <div class="xbrv-logo-slot">
-            <a href="index.html"><h1>კობესტყაოსანი</h1></a>
-        </div>
+  <header class="site-header">
+    <a class="brand" href="index.html">კობესტყაოსანი</a>
 
-        <button class="mobile-menu-toggle" aria-label="Toggle menu">
-            <i class="fas fa-bars"></i>
-        </button>
+    <nav class="nav">
+      <a href="index.html" class="active">მთავარი გვერდი</a>
+      <a href="comics.html">კომიქსი</a>
+      <a href="poema.html">პოემა</a>
+    </nav>
 
-        <nav class="xbrv-hyper-links">
-            <a href="index.html">მთავარი გვერდი</a>
-            <a href="comics.html">კომიქსი</a>
-            <a href="poema.html">პოემა</a>
-        </nav>
+    <a class="sign-in" href="signin.html">SIGN IN</a>
+  </header>
 
-        <div class="xbrv-auth-zone desktop-auth">
-            <a href="signin.html"><button class="xbrv-auth-btn">SIGN IN</button></a>
-        </div>
-    </header>
+  <main class="hero">
+    <section class="hero-inner">
+      <!-- left image -->
+      <div class="hero-media">
+        <img src="სურათები/image.png" alt="Artwork" />
+      </div>
 
-  <main>
-      <!-- MAIN CONTACT ZONE -->
-    <section class="neon-city-shell">
-        <section class="kb-hero">
-            <div class="kb-hero__img">
-                <img src="image.png" alt="რაჭა" />
-            </div>
+      <!-- right text -->
+      <div class="hero-copy">
+        <h2>კობესტყაოსანი</h2>
+        <p>
+          რაჭის ლამაზსა ქალაქში <br>
+კობე ერთია ათასში
+        </p>
 
-            <div class="kb-hero__content">
-                <h2 class="kb-hero__title">
-                რაჭის ლამაზსა ქალაქში<br />
-                კობე ერთია ათასში
-                </h2>
-
-                <a class="kb-hero__btn" href="poema.html">
-                წაიკითხე სრულად
-                </a>
-            </div>
-        </section>
+        <a class="cta" href="poema.html">წაიკითხე სრულად</a>
+      </div>
     </section>
-
   </main>
 
-
-  <footer>
-    <div class="footer">
-        <p style="font-family: 'Noto Serif Georgian', serif;">&copy; 2026 კობესტყაოსანი. პოეტი : საბა მელქაძე, პოეტის დამხმარე : ალექსანდრე გუდამათიაშვილი, მხატვარი : მათე ათოშვილი, საიტის ამწყობი : ნიკა ბრეგაძე.</p>
-    </div>
+  <footer class="site-footer">
+    <p>&copy; 2026 კობესტყაოსანი. პოეტი : საბა მელქაძე, პოეტის დამხმარე : ალექსანდრე გუდამათიაშვილი, მხატვარი : მათე ათოშვილი, საიტის ამწყობი : ნიკა ბრეგაძე.</p>
   </footer>
+
   
   <script>
   if (!localStorage.getItem("nickname")) {
     window.location.href = "./signin.html";
   }
     </script>
-
-
-<script>
-  const curtain = document.getElementById("curtain");
-  const DURATION = 420; // must match CSS transition time
-
-  // OPEN when page appears (including back/forward cache)
-  window.addEventListener("pageshow", () => {
-    // small delay so browser paints the closed curtain first
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => curtain.classList.add("is-open"));
-    });
-  });
-
-  // CLOSE on internal link click, then navigate
-  document.addEventListener("click", (e) => {
-    const a = e.target.closest("a");
-    if (!a) return;
-
-    const url = new URL(a.href, location.href);
-
-    const isSameOrigin = url.origin === location.origin;
-    const isModifiedClick = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
-    const isAnchorOnly = url.pathname === location.pathname && url.hash;
-
-    if (!isSameOrigin || isModifiedClick || a.target === "_blank" || a.hasAttribute("download") || isAnchorOnly) return;
-
-    e.preventDefault();
-
-    curtain.classList.remove("is-open"); // go CLOSED (covers)
-    setTimeout(() => {
-      location.href = a.href;
-    }, DURATION);
-  });
-</script>
-
 
 
 </body>
