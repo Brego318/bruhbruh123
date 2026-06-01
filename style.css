@@ -120,6 +120,62 @@ body{
   box-shadow: 0 6px 16px rgba(184, 92, 45, 0.3);
 }
 
+.auth-container{
+  justify-self: end;
+  position: relative;
+}
+
+.sign-in-btn{
+  justify-self:end;
+  color:var(--white);
+  font-weight:800;
+  font-size:13px;
+  padding:11px 18px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--rust), #D97D45);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(184, 92, 45, 0.2);
+}
+.sign-in-btn:hover{ 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(184, 92, 45, 0.3);
+}
+
+.user-menu{
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.user-name{
+  color: var(--rust);
+  font-weight: 800;
+  font-size: 14px;
+  padding: 8px 12px;
+  background: rgba(184, 92, 45, 0.08);
+  border-radius: 6px;
+  border: 1px solid rgba(184, 92, 45, 0.3);
+}
+
+.logout-btn{
+  color: var(--white);
+  font-weight: 800;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: rgba(184, 92, 45, 0.7);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.logout-btn:hover{
+  background: var(--rust);
+  transform: translateY(-1px);
+}
+
 /* MAIN HERO */
 .hero{
   width:min(1200px, 92%);

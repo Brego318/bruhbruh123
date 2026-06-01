@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobestyaosani – Comics</title>
+
+  <link rel="stylesheet" href="comics.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <script>
+    if (!localStorage.getItem("nickname")) {
+      window.location.href = "./signin.html";
+    }
+  </script>
+  <!-- Background -->
+  <div class="bg"></div>
+
+  <!-- Header -->
+  <header class="xbrv-orbit-nav">
+    <div class="xbrv-logo-slot">
+      <a href="index.html"><h1>კობესტყაოსანი</h1></a>
+    </div>
+
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="xbrv-hyper-links">
+      <a href="index.html">მთავარი გვერდი</a>
+      <a href="comics.html" class="active">კომიქსი</a>
+      <a href="poema.html">პოემა</a>
+    </nav>
+
+    <div class="xbrv-auth-zone desktop-auth">
+      <button class="xbrv-auth-btn" id="authBtn">SIGN IN</button>
+      <div class="xbrv-user-menu" id="userMenu" style="display:none;">
+        <div class="xbrv-user-name" id="userName"></div>
+        <button class="xbrv-logout-btn" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- Comics -->
+    <section class="panel">
+      <div class="panel-head">
+        <h1 class="panel-title">კომიქსი</h1>
+        <p class="panel-sub">კობესტყაოსნის კომიქსი სერია გამოჩნდება მალე</p>
+      </div>
+
+      <div class="comics-grid">
+        <!-- Comics will be added here -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p style="font-family:'Noto Serif Georgian', serif;">
+      &copy; 2026 კობესტყაოსანი. პოეტი : საბა მელქაძე, პოეტის დამხმარე : ალექსანდრე გუდამათიაშვილი,
+      მხატვარი : მათე ათოშვილი, საიტის ამწყობი : ნიკა ბრეგაძე.
+    </p>
+  </footer>
+
+  <!-- Auth script -->
+  <script>
+    const nickname = localStorage.getItem("nickname");
+    const authBtn = document.getElementById("authBtn");
+    const userMenu = document.getElementById("userMenu");
+    const userName = document.getElementById("userName");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    function initializeAuth() {
+      if (nickname) {
+        authBtn.style.display = "none";
+        userMenu.style.display = "flex";
+        userName.textContent = nickname;
+      } else {
+        authBtn.style.display = "block";
+        userMenu.style.display = "none";
+        // Redirect to signin if not logged in
+        window.location.href = "./signin.html";
+      }
+    }
+
+    authBtn.addEventListener("click", () => {
+      window.location.href = "./signin.html";
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("nickname");
+      window.location.href = "./signin.html";
+    });
+
+    initializeAuth();
+  </script>
+</body>
+</html>

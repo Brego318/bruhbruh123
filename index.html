@@ -32,7 +32,13 @@
       <a href="poema.html">პოემა</a>
     </nav>
 
-    <a class="sign-in" href="signin.html">SIGN IN</a>
+    <div class="auth-container">
+      <button class="sign-in-btn" id="authBtn">SIGN IN</button>
+      <div class="user-menu" id="userMenu" style="display:none;">
+        <div class="user-name" id="userName"></div>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+      </div>
+    </div>
   </header>
 
   <main class="hero">
@@ -61,9 +67,34 @@
 
   
   <script>
-  if (!localStorage.getItem("nickname")) {
-    window.location.href = "./signin.html";
+  // Check if user is logged in
+  const nickname = localStorage.getItem("nickname");
+  const authBtn = document.getElementById("authBtn");
+  const userMenu = document.getElementById("userMenu");
+  const userName = document.getElementById("userName");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  function initializeAuth() {
+    if (nickname) {
+      authBtn.style.display = "none";
+      userMenu.style.display = "block";
+      userName.textContent = nickname;
+    } else {
+      authBtn.style.display = "block";
+      userMenu.style.display = "none";
+    }
   }
+
+  authBtn.addEventListener("click", () => {
+    window.location.href = "./signin.html";
+  });
+
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("nickname");
+    window.location.href = "./signin.html";
+  });
+
+  initializeAuth();
     </script>
 
 

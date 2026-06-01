@@ -34,7 +34,11 @@
     </nav>
 
     <div class="xbrv-auth-zone desktop-auth">
-      <a href="signin.html"><button class="xbrv-auth-btn">SIGN IN</button></a>
+      <button class="xbrv-auth-btn" id="authBtn">SIGN IN</button>
+      <div class="xbrv-user-menu" id="userMenu" style="display:none;">
+        <div class="xbrv-user-name" id="userName"></div>
+        <button class="xbrv-logout-btn" id="logoutBtn">Logout</button>
+      </div>
     </div>
   </header>
 
@@ -60,6 +64,10 @@
 
       <!-- Chapter content goes here -->
       <article id="content" class="chapter-content"></article>
+
+      <div class="chapter-navigation">
+        <button id="nextChapterBtn" class="next-chapter-btn">შემდეგი გვერდი →</button>
+      </div>
     </section>
 
     <footer class="mini-footer">
@@ -67,6 +75,36 @@
     </footer>
   </main>
 
+  <!-- Auth script -->
+  <script>
+    const nickname = localStorage.getItem("nickname");
+    const authBtn = document.getElementById("authBtn");
+    const userMenu = document.getElementById("userMenu");
+    const userName = document.getElementById("userName");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    function initializeAuth() {
+      if (nickname) {
+        authBtn.style.display = "none";
+        userMenu.style.display = "flex";
+        userName.textContent = nickname;
+      } else {
+        authBtn.style.display = "block";
+        userMenu.style.display = "none";
+      }
+    }
+
+    authBtn.addEventListener("click", () => {
+      window.location.href = "./signin.html";
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("nickname");
+      window.location.href = "./signin.html";
+    });
+
+    initializeAuth();
+  </script>
 
   <!-- Firebase load chapter -->
   <script type="module">
@@ -165,6 +203,25 @@
       const cur = parseFloat(getComputedStyle(content).fontSize);
       setSize(clamp(cur + 1, 16, 24));
     });
+  </script>
+
+  <!-- Next Chapter Navigation -->
+  <script>
+    const currentId = Number(new URLSearchParams(location.search).get("id")) || 1;
+    const nextBtn = document.getElementById("nextChapterBtn");
+    const maxChapters = 12;
+
+    if (currentId >= maxChapters) {
+      nextBtn.disabled = true;
+      nextBtn.style.opacity = "0.5";
+      nextBtn.style.cursor = "not-allowed";
+      nextBtn.textContent = "ბოლო თავი";
+    } else {
+      nextBtn.addEventListener("click", () => {
+        const nextId = currentId + 1;
+        window.location.href = `chapter.html?id=${nextId}`;
+      });
+    }
   </script>
 
   

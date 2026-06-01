@@ -15,11 +15,6 @@
 </head>
 
 <body>
-  <script>
-    if (!localStorage.getItem("nickname")) {
-      window.location.href = "./signin.html";
-    }
-  </script>
   <!-- Background -->
   <div class="bg"></div>
 
@@ -40,9 +35,47 @@
     </nav>
 
     <div class="xbrv-auth-zone desktop-auth">
-      <a href="signin.html"><button class="xbrv-auth-btn">SIGN IN</button></a>
+      <button class="xbrv-auth-btn" id="authBtn">SIGN IN</button>
+      <div class="xbrv-user-menu" id="userMenu" style="display:none;">
+        <div class="xbrv-user-name" id="userName"></div>
+        <button class="xbrv-logout-btn" id="logoutBtn">Logout</button>
+      </div>
     </div>
   </header>
+
+  <!-- Auth script -->
+  <script>
+    // Check if user is logged in and update auth UI
+    const nickname = localStorage.getItem("nickname");
+    const authBtn = document.getElementById("authBtn");
+    const userMenu = document.getElementById("userMenu");
+    const userName = document.getElementById("userName");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    function initializeAuth() {
+      if (nickname) {
+        authBtn.style.display = "none";
+        userMenu.style.display = "flex";
+        userName.textContent = nickname;
+      } else {
+        authBtn.style.display = "block";
+        userMenu.style.display = "none";
+        // Redirect to signin if not logged in
+        window.location.href = "./signin.html";
+      }
+    }
+
+    authBtn.addEventListener("click", () => {
+      window.location.href = "./signin.html";
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("nickname");
+      window.location.href = "./signin.html";
+    });
+
+    initializeAuth();
+  </script>
 
   <main class="page">
     <!-- Chapters -->

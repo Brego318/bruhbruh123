@@ -141,6 +141,39 @@ a:visited{ color:inherit; }
   box-shadow: 0 6px 16px rgba(184, 92, 45, 0.3);
 }
 
+.xbrv-user-menu{
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.xbrv-user-name{
+  color: var(--rust);
+  font-weight: 800;
+  font-size: 14px;
+  padding: 8px 12px;
+  background: rgba(184, 92, 45, 0.08);
+  border-radius: 6px;
+  border: 1px solid rgba(184, 92, 45, 0.3);
+}
+
+.xbrv-logout-btn{
+  color: var(--white);
+  font-weight: 800;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: rgba(184, 92, 45, 0.7);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.xbrv-logout-btn:hover{
+  background: var(--rust);
+  transform: translateY(-1px);
+}
+
 /* Page */
 .page{
   width:min(1200px, 92%);
