@@ -135,8 +135,18 @@
         return;
       }
 
+      // Check if user is banned
+      const bannedUsers = JSON.parse(localStorage.getItem("bannedUsers") || "[]");
+      if (bannedUsers.includes(nickname)) {
+        statusEl.textContent = "You have been banned from this site.";
+        statusEl.style.color = "red";
+        saveBtn.disabled = true;
+        return;
+      }
+
       saveBtn.disabled = true;
       statusEl.textContent = "Saving...";
+      statusEl.style.color = "inherit";
 
       // Save locally
       localStorage.setItem("nickname", nickname);

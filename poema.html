@@ -38,25 +38,45 @@
       <button class="xbrv-auth-btn" id="authBtn">SIGN IN</button>
       <div class="xbrv-user-menu" id="userMenu" style="display:none;">
         <div class="xbrv-user-name" id="userName"></div>
-        <button class="xbrv-logout-btn" id="logoutBtn">Logout</button>
       </div>
     </div>
   </header>
 
   <!-- Auth script -->
   <script>
+    // Admin nickname for banning users
+    const admin_nickname = "admin";
+    
     // Check if user is logged in and update auth UI
     const nickname = localStorage.getItem("nickname");
     const authBtn = document.getElementById("authBtn");
     const userMenu = document.getElementById("userMenu");
     const userName = document.getElementById("userName");
-    const logoutBtn = document.getElementById("logoutBtn");
 
     function initializeAuth() {
       if (nickname) {
+        // Check if user is banned
+        const bannedUsers = JSON.parse(localStorage.getItem("bannedUsers") || "[]");
+        if (bannedUsers.includes(nickname)) {
+          alert("You have been banned from this site.");
+          localStorage.removeItem("nickname");
+          window.location.href = "./signin.html";
+          return;
+        }
+
         authBtn.style.display = "none";
         userMenu.style.display = "flex";
         userName.textContent = nickname;
+        
+        // Add admin panel if user is admin
+        if (nickname === admin_nickname) {
+          const adminPanel = document.createElement("button");
+          adminPanel.id = "adminPanelBtn";
+          adminPanel.textContent = "⚙️ Admin";
+          adminPanel.style.cssText = "margin-left: 12px; padding: 8px 12px; background: #D97D45; color: white; border: none; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer;";
+          userMenu.appendChild(adminPanel);
+          adminPanel.addEventListener("click", showAdminPanel);
+        }
       } else {
         authBtn.style.display = "block";
         userMenu.style.display = "none";
@@ -69,10 +89,18 @@
       window.location.href = "./signin.html";
     });
 
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("nickname");
-      window.location.href = "./signin.html";
-    });
+    function showAdminPanel() {
+      const bannedUsers = JSON.parse(localStorage.getItem("bannedUsers") || "[]");
+      const banList = bannedUsers.join("\n") || "No banned users";
+      const newBans = prompt("Current banned users:\n\n" + banList + "\n\nEnter usernames to ban (comma-separated):", "");
+      
+      if (newBans !== null) {
+        const usersToAdd = newBans.split(",").map(u => u.trim()).filter(u => u && u !== admin_nickname);
+        const updated = [...new Set([...bannedUsers, ...usersToAdd])];
+        localStorage.setItem("bannedUsers", JSON.stringify(updated));
+        alert("Ban list updated!");
+      }
+    }
 
     initializeAuth();
   </script>
