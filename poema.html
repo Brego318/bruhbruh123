@@ -16,12 +16,12 @@
 
 <body>
 
-  <!-- Force sign-in if no user profile is stored -->
-  <script>
-    if (!localStorage.getItem("nickname")) {
-      window.location.href = "signin.html"; 
-    }
-  </script>
+  <!-- Put this in the <head> of index.html, poema.html, etc. -->
+<script>
+  if (!localStorage.getItem("nickname")) {
+    window.location.href = "signin.html"; // Force them to pick a name
+  }
+</script>
   
   <!-- Background -->
   <div class="bg"></div>
@@ -50,6 +50,59 @@
     </div>
   </header>
 
+  <!-- Auth script -->
+  <script>
+    // Admin nickname for banning users
+    const admin_nickname = "admin";
+    
+    // Check if user is logged in and update auth UI
+    const nickname = localStorage.getItem("nickname");
+    const authBtn = document.getElementById("authBtn");
+    const userMenu = document.getElementById("userMenu");
+    const userName = document.getElementById("userName");
+
+    function initializeAuth() {
+      if (nickname) {
+        authBtn.style.display = "none";
+        userMenu.style.display = "flex";
+        userName.textContent = nickname;
+        
+        // Add admin panel if user is admin
+        if (nickname === admin_nickname) {
+          const adminPanel = document.createElement("button");
+          adminPanel.id = "adminPanelBtn";
+          adminPanel.textContent = "⚙️ Admin";
+          adminPanel.style.cssText = "margin-left: 12px; padding: 8px 12px; background: #D97D45; color: white; border: none; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer;";
+          userMenu.appendChild(adminPanel);
+          adminPanel.addEventListener("click", showAdminPanel);
+        }
+      } else {
+        authBtn.style.display = "block";
+        userMenu.style.display = "none";
+        window.location.href = "./signin.html";
+      }
+    }
+
+    authBtn.addEventListener("click", () => {
+      window.location.href = "./signin.html";
+    });
+
+    function showAdminPanel() {
+      const bannedUsers = JSON.parse(localStorage.getItem("bannedUsers") || "[]");
+      const banList = bannedUsers.join("\n") || "No banned users";
+      const newBans = prompt("Current banned users:\n\n" + banList + "\n\nEnter usernames to ban (comma-separated):", "");
+      
+      if (newBans !== null) {
+        const usersToAdd = newBans.split(",").map(u => u.trim()).filter(u => u && u !== admin_nickname);
+        const updated = [...new Set([...bannedUsers, ...usersToAdd])];
+        localStorage.setItem("bannedUsers", JSON.stringify(updated));
+        alert("Ban list updated!");
+      }
+    }
+
+    initializeAuth();
+  </script>
+
   <main class="page">
     <!-- Chapters -->
     <section class="panel">
@@ -74,7 +127,7 @@
       </div>
     </section>
 
-    <!-- Comments Section -->
+    <!-- Comments -->
     <section class="panel">
       <div class="panel-head">
         <h2 class="panel-title">კომენტარები</h2>
@@ -100,7 +153,7 @@
     </p>
   </footer>
 
-  <!-- DATABASE MODULE -->
+  <!-- YOUR FIREBASE SCRIPT (UNCHANGED) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import {
@@ -128,7 +181,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const ADMIN_NICKNAME = "admin"; 
+    const ADMIN_NICKNAME = "admin"; // 👈 must match EXACTLY what you saved in signin
 
     const commentInput = document.getElementById("commentText");
     const postBtn = document.getElementById("postComment");
@@ -139,7 +192,6 @@
       return (localStorage.getItem("nickname") || "").trim();
     }
 
-    // Post Main Comment
     postBtn.addEventListener("click", async () => {
       const name = nickname();
       const text = commentInput.value.trim();
@@ -173,7 +225,11 @@
       }
     });
 
-    // Real-time listener for public unlocked chapters
+    const q = query(collection(db, "comments"), orderBy("createdAt", "desc"));
+
+    // ----------------------------
+    // CHAPTER LIST (unlocked only)
+    // ----------------------------
     const chapterListEl = document.getElementById("chapterList");
     const chapterStatusEl = document.getElementById("chapterStatus");
 
@@ -184,7 +240,8 @@
     );
 
     onSnapshot(chaptersQ, (snap) => {
-      if (!chapterListEl) return;
+      if (!chapterListEl) return; // if you didn't add the div yet
+
       chapterListEl.innerHTML = "";
 
       if (snap.empty) {
@@ -199,154 +256,52 @@
         const a = document.createElement("a");
         a.href = `chapter.html?id=${docSnap.id}`;
         a.textContent = ch.title || `Chapter ${docSnap.id}`;
+
+        // simple styling (remove if you already style links)
         a.style.display = "block";
         a.style.padding = "10px 0";
+
         chapterListEl.appendChild(a);
       });
     });
 
-    // Real-time listener for Threaded Comments and Replies
-    const q = query(collection(db, "comments"), orderBy("createdAt", "desc"));
-    
+    // ✅ REPLACED onSnapshot with admin delete support
     onSnapshot(q, (snap) => {
       listEl.innerHTML = "";
 
-      const parents = [];
-      const replies = [];
-
-      // Sort components into parent streams and reply streams
       snap.forEach((docSnap) => {
         const c = docSnap.data();
-        const commentItem = { id: docSnap.id, ...c };
-        
-        if (c.parentId) {
-          replies.push(commentItem);
-        } else {
-          parents.push(commentItem);
-        }
-      });
 
-      // Show sub-replies chronologically (oldest at the top)
-      replies.sort((a, b) => {
-        const timeA = a.createdAt?.toMillis() || 0;
-        const timeB = b.createdAt?.toMillis() || 0;
-        return timeA - timeB;
-      });
-
-      // Render Top-Level Parent Comments
-      parents.forEach((p) => {
         const div = document.createElement("div");
-        div.style.borderBottom = "1px solid #222";
-        div.style.padding = "16px 0";
+        div.style.borderBottom = "1px solid #333";
+        div.style.padding = "10px 0";
 
         div.innerHTML = `
-          <strong style="color: #fff; font-size: 15px;">${escapeHtml(p.nickname)}</strong>
-          <p style="margin: 6px 0 12px 0; color: #ccc; font-size: 14px; line-height: 1.5;">${escapeHtml(p.text)}</p>
+          <strong>${escapeHtml(c.nickname)}</strong>
+          <p>${escapeHtml(c.text)}</p>
         `;
 
-        // Action Toolbar Container
-        const actionsRow = document.createElement("div");
-        actionsRow.style.display = "flex";
-        actionsRow.style.gap = "10px";
-        actionsRow.style.alignItems = "center";
-
-        // Reply Interface Button
-        const replyBtn = document.createElement("button");
-        replyBtn.textContent = "Reply";
-        replyBtn.style.cssText = "background: #181818; color: #aaa; border: 1px solid #333; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;";
-        actionsRow.appendChild(replyBtn);
-
-        // Hidden Inline Reply Editor
-        const replyFormContainer = document.createElement("div");
-        replyFormContainer.style.cssText = "margin: 12px 0 0 0; display: none; width: 100%; max-width: 500px;";
-
-        replyBtn.onclick = () => {
-          if (replyFormContainer.style.display === "none") {
-            replyFormContainer.style.display = "block";
-            replyFormContainer.innerHTML = `
-              <textarea placeholder="Reply to ${escapeHtml(p.nickname)}..." style="width: 100%; height: 70px; background: #111; color: #fff; border: 1px solid #333; border-radius: 6px; padding: 10px; box-sizing: border-box; resize: none; font-size: 13px; font-family: sans-serif;"></textarea>
-              <div style="margin-top: 6px; display:flex; gap: 8px;">
-                <button class="submit-reply" style="background: #D97D45; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 800; font-size: 12px;">Submit</button>
-                <button class="cancel-reply" style="background: transparent; color: #888; border: none; padding: 6px 12px; cursor: pointer; font-size: 12px;">Cancel</button>
-              </div>
-            `;
-
-            const ta = replyFormContainer.querySelector("textarea");
-            const sendBtn = replyFormContainer.querySelector(".submit-reply");
-            const closeBtn = replyFormContainer.querySelector(".cancel-reply");
-
-            closeBtn.onclick = () => replyFormContainer.style.display = "none";
-
-            sendBtn.onclick = async () => {
-              const rName = nickname();
-              const rText = ta.value.trim();
-
-              if (!rName) { window.location.href = "./signin.html"; return; }
-              if (!rText) return;
-
-              sendBtn.disabled = true;
-
-              try {
-                await addDoc(collection(db, "comments"), {
-                  nickname: rName,
-                  text: rText,
-                  parentId: p.id, 
-                  createdAt: serverTimestamp()
-                });
-                replyFormContainer.style.display = "none";
-              } catch (e) {
-                console.error("Error creating reply: ", e);
-                sendBtn.disabled = false;
-              }
-            };
-          } else {
-            replyFormContainer.style.display = "none";
-          }
-        };
-
-        // Standard Admin Eraser Tool
+        // show delete button only to admin
         if (nickname() === ADMIN_NICKNAME) {
           const delBtn = document.createElement("button");
           delBtn.textContent = "Delete";
-          delBtn.style.cssText = "background: crimson; color: white; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;";
+          delBtn.style.marginTop = "6px";
+          delBtn.style.background = "crimson";
+          delBtn.style.color = "white";
+          delBtn.style.border = "none";
+          delBtn.style.padding = "8px 12px";
+          delBtn.style.borderRadius = "8px";
+          delBtn.style.cursor = "pointer";
 
           delBtn.onclick = async () => {
             if (!confirm("Delete this comment?")) return;
-            await deleteDoc(doc(db, "comments", p.id));
+            await deleteDoc(doc(db, "comments", docSnap.id));
           };
 
-          actionsRow.appendChild(delBtn);
+          div.appendChild(delBtn);
         }
 
-        div.appendChild(actionsRow);
-        div.appendChild(replyFormContainer);
         listEl.appendChild(div);
-
-        // Filter and Render Child Replies belonging to this Parent
-        const linkedReplies = replies.filter(r => r.parentId === p.id);
-        linkedReplies.forEach((r) => {
-          const replyDiv = document.createElement("div");
-          replyDiv.style.cssText = "margin-left: 24px; margin-top: 12px; padding: 10px 16px; background: rgba(255,255,255,0.02); border-left: 3px solid #D97D45; border-radius: 0 8px 8px 0;";
-          
-          replyDiv.innerHTML = `
-            <strong style="font-size: 13px; color: #D97D45; display: block; margin-bottom: 4px;">${escapeHtml(r.nickname)}</strong>
-            <p style="margin: 0; font-size: 13px; color: #bbb; line-height: 1.4;">${escapeHtml(r.text)}</p>
-          `;
-
-          if (nickname() === ADMIN_NICKNAME) {
-            const delReplyBtn = document.createElement("button");
-            delReplyBtn.textContent = "Delete Reply";
-            delReplyBtn.style.cssText = "background: crimson; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-top: 8px; display: block;";
-            
-            delReplyBtn.onclick = async () => {
-              if (!confirm("Delete this reply?")) return;
-              await deleteDoc(doc(db, "comments", r.id));
-            };
-            replyDiv.appendChild(delReplyBtn);
-          }
-
-          listEl.appendChild(replyDiv);
-        });
       });
     });
 
@@ -360,8 +315,46 @@
       }[m]));
     }
   </script>
+  <script type="module" src="./global-ban.js">
+        // --- NEW GLOBAL BAN SYSTEM ---
+    const banDocRef = doc(db, "admin", "bans");
 
-  <!-- Global Shared Presence and Defenses Module Hooks -->
+    // 1. Real-time listener: Kicks the user out instantly if they get banned
+    onSnapshot(banDocRef, (snap) => {
+      if (snap.exists()) {
+        const bannedUsers = snap.data().list || [];
+        const currentNick = nickname(); // using your existing nickname() function
+        
+        if (currentNick && bannedUsers.includes(currentNick)) {
+
+          document.body.innerHTML = '<div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#000;font-size:120px;font-weight:900;color:#FF0000;letter-spacing:10px;text-shadow:0 0 20px rgba(255,0,0,0.8);">BANNED</div>';
+        }
+      }
+    });
+
+    // 2. Override the regular showAdminPanel function to use Firestore
+    window.showAdminPanel = async function() {
+      try {
+        const snap = await getDoc(banDocRef);
+        const bannedUsers = snap.exists() ? snap.data().list || [] : [];
+        
+        const banList = bannedUsers.join("\n") || "No banned users";
+        const newBans = prompt("Current banned users:\n\n" + banList + "\n\nEnter usernames to ban (comma-separated):", "");
+        
+        if (newBans !== null) {
+          const usersToAdd = newBans.split(",").map(u => u.trim()).filter(u => u && u !== ADMIN_NICKNAME);
+          const updated = [...new Set([...bannedUsers, ...usersToAdd])]; // Prevent duplicates
+          
+          // Save the updated list back to the database
+          await setDoc(banDocRef, { list: updated });
+          alert("Ban list updated globally!");
+        }
+      } catch (error) {
+        alert("Error updating bans: " + error.message);
+      }
+    };
+  </script>
+
   <script type="module" src="./auth.js"></script>
   <script type="module" src="./global-ban.js"></script>
 </body>
