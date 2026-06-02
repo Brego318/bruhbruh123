@@ -16,7 +16,6 @@
 
 <body>
 
-
   <div class="bg"></div>
 
   <header class="xbrv-orbit-nav">
@@ -116,6 +115,14 @@
       return;
     }
 
+    // RESTRICTION: Block variations of the "admin" nickname
+    if (nickname.toLowerCase() === "admin") {
+      statusEl.textContent = "ეს მეტსახელი დაცულია და მისი გამოყენება შეუძლებელია.";
+      statusEl.style.color = "red";
+      saveBtn.disabled = false;
+      return;
+    }
+
     saveBtn.disabled = true;
     statusEl.textContent = "Checking...";
 
@@ -132,7 +139,7 @@
         return;
       }
 
-      // If not banned, save and redirect
+      // If not banned and name is valid, save and redirect
       localStorage.setItem("nickname", nickname);
       const clientId = getClientId();
       
