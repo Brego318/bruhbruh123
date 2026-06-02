@@ -7,7 +7,7 @@
 
   <link rel="stylesheet" href="signin.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -15,6 +15,14 @@
 </head>
 
 <body>
+
+  <!-- Put this in the <head> of index.html, poema.html, etc. -->
+<script>
+  if (!localStorage.getItem("nickname")) {
+    window.location.href = "signin.html"; // Force them to pick a name
+  }
+</script>
+
   <div class="bg"></div>
 
   <header class="xbrv-orbit-nav">
@@ -177,6 +185,8 @@
     });
   </script>
 
- 
+ <script type="module" src="./global-ban.js">
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+ </script>
 </body>
 </html>

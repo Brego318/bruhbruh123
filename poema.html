@@ -15,17 +15,13 @@
 </head>
 
 <body>
-  <!-- Immediate ban check -->
-  <script>
-    const nickname = localStorage.getItem("nickname");
-    const bannedUsers = JSON.parse(localStorage.getItem("bannedUsers") || "[]");
-    
-    if (nickname && bannedUsers.includes(nickname)) {
-      document.write('<!DOCTYPE html><html><head><style>body{margin:0;padding:0;width:100%;height:100vh;display:flex;align-items:center;justify-content:center;background:#000;font-family:"Montserrat", system-ui, Arial, sans-serif;}div{font-size:120px;font-weight:900;color:#FF0000;text-align:center;letter-spacing:10px;text-shadow:0 0 20px rgba(255,0,0,0.8);}</style></head><body><div>BANNED</div></body></html>');
-      document.close();
-      throw new Error("User is banned");
-    }
-  </script>
+
+  <!-- Put this in the <head> of index.html, poema.html, etc. -->
+<script>
+  if (!localStorage.getItem("nickname")) {
+    window.location.href = "signin.html"; // Force them to pick a name
+  }
+</script>
   
   <!-- Background -->
   <div class="bg"></div>
@@ -185,7 +181,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const ADMIN_NICKNAME = "Yleebi13"; // 👈 must match EXACTLY what you saved in signin
+    const ADMIN_NICKNAME = "admin"; // 👈 must match EXACTLY what you saved in signin
 
     const commentInput = document.getElementById("commentText");
     const postBtn = document.getElementById("postComment");
@@ -318,6 +314,45 @@
         "'": "&#039;"
       }[m]));
     }
+  </script>
+  <script type="module" src="./global-ban.js">
+        // --- NEW GLOBAL BAN SYSTEM ---
+    const banDocRef = doc(db, "admin", "bans");
+
+    // 1. Real-time listener: Kicks the user out instantly if they get banned
+    onSnapshot(banDocRef, (snap) => {
+      if (snap.exists()) {
+        const bannedUsers = snap.data().list || [];
+        const currentNick = nickname(); // using your existing nickname() function
+        
+        if (currentNick && bannedUsers.includes(currentNick)) {
+          localStorage.removeItem("nickname"); // Erase their login
+          document.body.innerHTML = '<div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#000;font-size:120px;font-weight:900;color:#FF0000;letter-spacing:10px;text-shadow:0 0 20px rgba(255,0,0,0.8);">BANNED</div>';
+        }
+      }
+    });
+
+    // 2. Override the regular showAdminPanel function to use Firestore
+    window.showAdminPanel = async function() {
+      try {
+        const snap = await getDoc(banDocRef);
+        const bannedUsers = snap.exists() ? snap.data().list || [] : [];
+        
+        const banList = bannedUsers.join("\n") || "No banned users";
+        const newBans = prompt("Current banned users:\n\n" + banList + "\n\nEnter usernames to ban (comma-separated):", "");
+        
+        if (newBans !== null) {
+          const usersToAdd = newBans.split(",").map(u => u.trim()).filter(u => u && u !== ADMIN_NICKNAME);
+          const updated = [...new Set([...bannedUsers, ...usersToAdd])]; // Prevent duplicates
+          
+          // Save the updated list back to the database
+          await setDoc(banDocRef, { list: updated });
+          alert("Ban list updated globally!");
+        }
+      } catch (error) {
+        alert("Error updating bans: " + error.message);
+      }
+    };
   </script>
 </body>
 </html>
