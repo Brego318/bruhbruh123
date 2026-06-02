@@ -3,7 +3,7 @@ import { db } from "./firebase-config.js";
 
 const admin_nickname = "admin";
 
-// 1. Real-time Ban Check (Listens even if they try to clear their current nickname session)
+// 1. REAL-TIME BAN WATCHER (Kicks banned users instantly)
 const banDocRef = doc(db, "admin", "bans");
 onSnapshot(banDocRef, (snap) => {
     if (snap.exists()) {
@@ -11,18 +11,12 @@ onSnapshot(banDocRef, (snap) => {
         const currentNickname = localStorage.getItem("nickname");
         const flaggedName = localStorage.getItem("bannedNickname");
 
-        // Block if their active name is banned OR if their persistent device flag is still banned
         if ((currentNickname && bannedUsers.includes(currentNickname)) || (flaggedName && bannedUsers.includes(flaggedName))) {
-            
-            // Permanently tag this browser with the name that got them banned
             if (currentNickname && !flaggedName) {
                 localStorage.setItem("bannedNickname", currentNickname);
             }
-            
-            // Clear their active login session
             localStorage.removeItem("nickname");
             
-            // Render the black ban block screen
             document.body.innerHTML = `
               <div style="height:100vh; width:100vw; display:flex; align-items:center; justify-content:center; background:#000; margin:0; position:fixed; top:0; left:0; z-index:999999;">
                 <span style="font-size:12vw; font-weight:900; color:#FF0000; letter-spacing:10px; text-shadow:0 0 20px rgba(255,0,0,0.8); font-family:sans-serif;">
@@ -32,7 +26,6 @@ onSnapshot(banDocRef, (snap) => {
             `;
             document.body.style.overflow = "hidden"; 
         } else {
-            // If the admin completely removes their name from the ban list, unlock their device automatically
             if (flaggedName && !bannedUsers.includes(flaggedName)) {
                 localStorage.removeItem("bannedNickname");
                 window.location.reload();
@@ -41,7 +34,7 @@ onSnapshot(banDocRef, (snap) => {
     }
 });
 
-// 2. Force users to signin.html if they don't have a nickname set (skip if device is already blocked)
+// 2. ROUTING PROTECTION
 const nickname = localStorage.getItem("nickname");
 const bannedNickname = localStorage.getItem("bannedNickname");
 
@@ -49,7 +42,7 @@ if (!nickname && !bannedNickname && !window.location.pathname.includes("signin.h
     window.location.href = "./signin.html";
 }
 
-// 3. Setup Header UI and Admin Controls
+// 3. ADMIN PANEL GENERATOR (Fixes Active User Visibility)
 document.addEventListener("DOMContentLoaded", () => {
     const authBtn = document.getElementById("authBtn");
     const userMenu = document.getElementById("userMenu");
@@ -68,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
+        // Generate Admin Button if you are logged in as admin
         if (nickname === admin_nickname && userMenu && !document.getElementById("adminPanelBtn")) {
             const adminPanel = document.createElement("button");
             adminPanel.id = "adminPanelBtn";
@@ -80,9 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 const profilesRef = collection(db, "profiles");
                 
                 try {
-                    // Fetch active users registered inside the database
+                    // FIX: Explicitly queries the 'profiles' collection for all signed-in users
                     const profilesSnap = await getDocs(profilesRef);
                     const activeNicknames = [];
+                    
                     profilesSnap.forEach((userDoc) => {
                         const userData = userDoc.data();
                         if (userData.nickname && userData.nickname !== admin_nickname) {
@@ -90,16 +85,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     });
                     
-                    // Format active users text block
+                    // Format active users text block and remove any duplicates
                     const deduplicatedActive = [...new Set(activeNicknames)];
                     const activeListText = deduplicatedActive.length > 0 ? deduplicatedActive.join(", ") : "No active users registered";
 
-                    // Fetch banned users
+                    // Fetch the current ban list
                     const snap = await getDoc(banDocRef);
                     const bannedUsers = snap.exists() ? snap.data().list || [] : [];
                     const banListCsv = bannedUsers.join(", ");
                     
-                    // Open prompt containing database visibility context
+                    // Display the dynamic prompt window
                     const newBans = prompt(
                         `ACTIVE REGISTERED USERS:\n[ ${activeListText} ]\n\n` +
                         `Manage Banned Users (comma-separated):\n\n` +
