@@ -82,57 +82,6 @@
     </footer>
   </main>
 
-  <!-- Auth script -->
-  <script>
-    // Admin nickname for banning users
-    const admin_nickname = "admin";
-    
-    const nickname = localStorage.getItem("nickname");
-    const authBtn = document.getElementById("authBtn");
-    const userMenu = document.getElementById("userMenu");
-    const userName = document.getElementById("userName");
-
-    function initializeAuth() {
-      if (nickname) {
-        authBtn.style.display = "none";
-        userMenu.style.display = "flex";
-        userName.textContent = nickname;
-        
-        // Add admin panel if user is admin
-        if (nickname === admin_nickname) {
-          const adminPanel = document.createElement("button");
-          adminPanel.id = "adminPanelBtn";
-          adminPanel.textContent = "⚙️ Admin";
-          adminPanel.style.cssText = "margin-left: 12px; padding: 8px 12px; background: #D97D45; color: white; border: none; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer;";
-          userMenu.appendChild(adminPanel);
-          adminPanel.addEventListener("click", showAdminPanel);
-        }
-      } else {
-        authBtn.style.display = "block";
-        userMenu.style.display = "none";
-      }
-    }
-
-    authBtn.addEventListener("click", () => {
-      window.location.href = "./signin.html";
-    });
-
-    function showAdminPanel() {
-      const bannedUsers = JSON.parse(localStorage.getItem("bannedUsers") || "[]");
-      const banList = bannedUsers.join("\n") || "No banned users";
-      const newBans = prompt("Current banned users:\n\n" + banList + "\n\nEnter usernames to ban (comma-separated):", "");
-      
-      if (newBans !== null) {
-        const usersToAdd = newBans.split(",").map(u => u.trim()).filter(u => u && u !== admin_nickname);
-        const updated = [...new Set([...bannedUsers, ...usersToAdd])];
-        localStorage.setItem("bannedUsers", JSON.stringify(updated));
-        alert("Ban list updated!");
-      }
-    }
-
-    initializeAuth();
-  </script>
-
   <!-- Firebase load chapter -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
@@ -251,6 +200,7 @@
     }
   </script>
 
+  <script type="module" src="./auth.js"></script>
   <script type="module" src="./global-ban.js"></script>
 </body>
 </html>

@@ -16,12 +16,6 @@
 
 <body>
 
-  <!-- Put this in the <head> of index.html, poema.html, etc. -->
-<script>
-  if (!localStorage.getItem("nickname")) {
-    window.location.href = "signin.html"; // Force them to pick a name
-  }
-</script>
 
   <div class="bg"></div>
 
@@ -88,105 +82,82 @@
     </p>
   </footer>
 
-
-  <!-- Firebase nickname script (UNCHANGED) -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+  import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+  import { db } from "./firebase-config.js";
 
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyBd7OSQKhHA-iY4ET5JQOF-PDwb-fIQ46Y",
-      authDomain: "kobestyaosani.firebaseapp.com",
-      projectId: "kobestyaosani",
-      storageBucket: "kobestyaosani.firebasestorage.app",
-      messagingSenderId: "30467496929",
-      appId: "1:30467496929:web:2d49f73e90388c2fcd10a0"
-    };
+  const nicknameEl = document.getElementById("nickname");
+  const saveBtn = document.getElementById("saveBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const statusEl = document.getElementById("status");
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  function getClientId() {
+    let id = localStorage.getItem("clientId");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("clientId", id);
+    }
+    return id;
+  }
 
-    const nicknameEl = document.getElementById("nickname");
-    const saveBtn = document.getElementById("saveBtn");
-    const clearBtn = document.getElementById("clearBtn");
-    const statusEl = document.getElementById("status");
+  const saved = localStorage.getItem("nickname");
+  if (saved) nicknameEl.value = saved;
 
-    function getClientId() {
-      let id = localStorage.getItem("clientId");
-      if (!id) {
-        id = crypto.randomUUID();
-        localStorage.setItem("clientId", id);
-      }
-      return id;
+  clearBtn.addEventListener("click", () => {
+    localStorage.removeItem("nickname");
+    nicknameEl.value = "";
+    statusEl.textContent = "წაიშალა.";
+  });
+
+  async function saveNickname() {
+    const nickname = nicknameEl.value.trim();
+
+    if (nickname.length < 1) {
+      statusEl.textContent = "შეიყვანეთ თქვენი მეტსახელი.";
+      return;
     }
 
-    // Prefill if already saved
-    const saved = localStorage.getItem("nickname");
-    if (saved) nicknameEl.value = saved;
+    saveBtn.disabled = true;
+    statusEl.textContent = "Checking...";
 
-    clearBtn.addEventListener("click", () => {
-      localStorage.removeItem("nickname");
-      nicknameEl.value = "";
-      statusEl.textContent = "წაიშალა.";
-    });
+    try {
+      // Check the global ban list in the database
+      const banDocRef = doc(db, "admin", "bans");
+      const snap = await getDoc(banDocRef);
+      const bannedUsers = snap.exists() ? snap.data().list || [] : [];
 
-    async function saveNickname() {
-      const nickname = nicknameEl.value.trim();
-
-      if (nickname.length < 1) {
-        statusEl.textContent = "შეიყვანეთ თქვენი მეტსახელი.";
-        return;
-      }
-      if (nickname.length > 20) {
-        statusEl.textContent = "მეტსახელი ზედმეტად გრძელია (მაქს 20).";
-        return;
-      }
-
-      // Check if user is banned
-      const bannedUsers = JSON.parse(localStorage.getItem("bannedUsers") || "[]");
       if (bannedUsers.includes(nickname)) {
         statusEl.textContent = "You have been banned from this site.";
         statusEl.style.color = "red";
-        saveBtn.disabled = true;
+        saveBtn.disabled = true; 
         return;
       }
 
-      saveBtn.disabled = true;
-      statusEl.textContent = "Saving...";
-      statusEl.style.color = "inherit";
-
-      // Save locally
+      // If not banned, save and redirect
       localStorage.setItem("nickname", nickname);
-
-      // Save to Firestore
       const clientId = getClientId();
-      try {
-        await setDoc(doc(db, "profiles", clientId), {
-          nickname,
-          updatedAt: serverTimestamp()
-        });
+      
+      await setDoc(doc(db, "profiles", clientId), {
+        nickname,
+        updatedAt: serverTimestamp()
+      });
 
-        statusEl.textContent = "Saved ✅ Redirecting...";
-        // change this to your main page
-        window.location.href = "./index.html";
-      } catch (e) {
-        console.error(e);
-        statusEl.textContent = "Error saving. Check Firestore rules / console.";
-        saveBtn.disabled = false;
-      }
+      statusEl.textContent = "Saved ✅ Redirecting...";
+      window.location.href = "./index.html";
+      
+    } catch (e) {
+      console.error(e);
+      statusEl.textContent = "Error connecting to database.";
+      saveBtn.disabled = false;
     }
+  }
 
-    saveBtn.addEventListener("click", saveNickname);
+  saveBtn.addEventListener("click", saveNickname);
+  nicknameEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") saveNickname();
+  });
+</script>
+<script type="module" src="./global-ban.js"></script>
 
-    // Enter key submits
-    nicknameEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") saveNickname();
-    });
-  </script>
-
- <script type="module" src="./global-ban.js">
-  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
- </script>
 </body>
 </html>

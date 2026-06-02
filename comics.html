@@ -83,76 +83,8 @@
     </p>
   </footer>
 
-  <!-- Auth & Admin script -->
-  <script type="module">
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-    // IMPORTANT: Make sure you import your initialized Firebase app here!
-    import { app } from "./firebase-config.js"; 
-    
-    const db = getFirestore(app);
 
-    // Admin nickname for banning users
-    const admin_nickname = "admin";
-    
-    // Change it to this:
-    const currentNickname = localStorage.getItem("nickname");
-    const userMenu = document.getElementById("userMenu");
-    const userName = document.getElementById("userName");
-    const authBtn = document.getElementById("authBtn");
-
-    function initializeAuth() {
-      // If they don't have a nickname, they shouldn't even be here, 
-      // but just in case, redirect them.
-      if (!nickname) {
-        window.location.href = "./signin.html";
-        return;
-      }
-
-      // Hide the login button and show the user menu
-      if (authBtn) authBtn.style.display = "none";
-      userMenu.style.display = "flex";
-      userName.textContent = nickname;
-      
-      // Add admin panel if user is admin
-      if (nickname === admin_nickname) {
-        const adminPanel = document.createElement("button");
-        adminPanel.id = "adminPanelBtn";
-        adminPanel.textContent = "⚙️ Admin";
-        adminPanel.style.cssText = "margin-left: 12px; padding: 8px 12px; background: #D97D45; color: white; border: none; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer;";
-        userMenu.appendChild(adminPanel);
-        adminPanel.addEventListener("click", showAdminPanel);
-      }
-    }
-
-    // New Firebase-powered Admin Panel
-    async function showAdminPanel() {
-      const banDocRef = doc(db, "admin", "bans");
-      
-      try {
-        // 1. Get the current ban list from the cloud
-        const snap = await getDoc(banDocRef);
-        const bannedUsers = snap.exists() ? snap.data().list || [] : [];
-        
-        // 2. Ask admin who to ban
-        const banList = bannedUsers.join("\n") || "No banned users";
-        const newBans = prompt("Current banned users:\n\n" + banList + "\n\nEnter usernames to ban (comma-separated):", "");
-        
-        // 3. Save the new list to the cloud
-        if (newBans !== null) {
-          const usersToAdd = newBans.split(",").map(u => u.trim()).filter(u => u && u !== admin_nickname);
-          const updated = [...new Set([...bannedUsers, ...usersToAdd])]; // Prevent duplicates
-          
-          await setDoc(banDocRef, { list: updated });
-          alert("Ban list updated globally!");
-        }
-      } catch (error) {
-        alert("Error updating bans. Check your database connection: " + error.message);
-      }
-    }
-
-    initializeAuth();
-  </script>
-
+  <script type="module" src="./auth.js"></script>
   <script type="module" src="./global-ban.js"></script>
 </body>
 </html>
